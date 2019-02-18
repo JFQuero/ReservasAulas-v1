@@ -1,5 +1,8 @@
 package org.iesalandalus.programacion.reservasaulas.modelo.dao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.naming.OperationNotSupportedException;
 
 import org.iesalandalus.programacion.reservasaulas.modelo.dominio.Aula;
@@ -9,14 +12,11 @@ import org.iesalandalus.programacion.reservasaulas.modelo.dominio.Reserva;
 
 public class Reservas {
 
-	private static final int MAX_RESERVAS = 120;
-	private int numReservas;
-	private Reserva[] coleccionReservas;
+	private List<Reserva> coleccionReservas;
 
 	/* Constructores */
 	public Reservas() {
-		coleccionReservas = new Reserva[MAX_RESERVAS];
-		numReservas = 0;
+		coleccionReservas = new ArrayList<>();
 	}
 
 	public Reservas(Reservas reservas) {
@@ -29,68 +29,39 @@ public class Reservas {
 			throw new IllegalArgumentException("No se pueden copiar reservas nulas.");
 		}
 		coleccionReservas = copiaProfundaReservas(reservas.coleccionReservas);
-		numReservas = reservas.numReservas;
 	}
 
-	private Reserva[] copiaProfundaReservas(Reserva[] reservas) {
-		Reserva[] copiaReservas = new Reserva[reservas.length];
-		for (int i = 0; i < reservas.length && reservas[i] != null; i++) {
-			copiaReservas[i] = new Reserva(reservas[i]);
+	private List<Reserva> copiaProfundaReservas(List<Reserva> reservas) {
+		List<Reserva> copiaReservas = new ArrayList<>();
+		for (Reserva reserva : reservas) {
+			copiaReservas.add(new Reserva(reserva));
 		}
 		return copiaReservas;
 	}
 
-	public Reserva[] getReservas() {
+	public List<Reserva> getReservas() {
 		return copiaProfundaReservas(coleccionReservas);
 	}
 
 	public int getNumReservas() {
-		return numReservas;
+		return coleccionReservas.size();
 	}
 
 	public void insertar(Reserva reserva) throws OperationNotSupportedException {
 		if (reserva == null) {
 			throw new IllegalArgumentException("No se puede realizar una reserva nula.");
 		}
-		int indice = buscarIndiceReserva(reserva);
-		if (!indiceNoSuperaTamano(indice)) {
-			coleccionReservas[indice] = new Reserva(reserva);
-			numReservas++;
+		if (coleccionReservas.contains(reserva)) {
+			throw new OperationNotSupportedException("La reserva ya existe.");
 		} else {
-			if (indiceNoSuperaCapacidad(indice)) {
-				throw new OperationNotSupportedException("La reserva ya existe.");
-			} else {
-				throw new OperationNotSupportedException("No se aceptan más reservas.");
-			}
+			coleccionReservas.add(new Reserva(reserva));
 		}
-	}
-
-	private int buscarIndiceReserva(Reserva reserva) {
-		int indice = 0;
-		boolean reservaEncontrada = false;
-		while (indiceNoSuperaTamano(indice) && !reservaEncontrada) {
-			if (coleccionReservas[indice].equals(reserva)) {
-				reservaEncontrada = true;
-			} else {
-				indice++;
-			}
-		}
-		return indice;
-	}
-
-	private boolean indiceNoSuperaTamano(int indice) {
-		return indice < numReservas;
-	}
-
-	private boolean indiceNoSuperaCapacidad(int indice) {
-		return indice < MAX_RESERVAS;
 	}
 
 	public Reserva buscar(Reserva reserva) {
-		int indice = 0;
-		indice = buscarIndiceReserva(reserva);
-		if (indiceNoSuperaTamano(indice)) {
-			return new Reserva(coleccionReservas[indice]);
+		int indice = coleccionReservas.indexOf(reserva);
+		if (indice != -1) {
+			return new Reserva(coleccionReservas.get(indice));
 		} else {
 			return null;
 		}
@@ -100,73 +71,53 @@ public class Reservas {
 		if (reserva == null) {
 			throw new IllegalArgumentException("No se puede anular una reserva nula.");
 		}
-		int indice = buscarIndiceReserva(reserva);
-		if (indiceNoSuperaTamano(indice)) {
-			desplazarUnaPosicionHaciaIzquierda(indice);
-		} else {
+		if (!coleccionReservas.remove(reserva)) {
 			throw new OperationNotSupportedException("La reserva a anular no existe.");
 		}
 	}
 
-	private void desplazarUnaPosicionHaciaIzquierda(int indice) {
-		for (int i = indice; i < numReservas - 1; i++) {
-			coleccionReservas[i] = coleccionReservas[i + 1];
-		}
-		coleccionReservas[numReservas] = null;
-		numReservas--;
-	}
-
-	public String[] representar() {
-		String[] representacion = new String[numReservas];
-		for (int i = 0; indiceNoSuperaTamano(i); i++) {
-			representacion[i] = coleccionReservas[i].toString();
+	public List<String> representar() {
+		List<String> representacion = new ArrayList<>();
+		for (Reserva reserva : coleccionReservas) {
+			representacion.add(new Reserva(reserva).toString());
 		}
 		return representacion;
 	}
 
-	public Reserva[] getReservasProfesor(Profesor profesor) {
+	public List<Reserva> getReservasProfesor(Profesor profesor) {
 		if (profesor == null) {
 			throw new IllegalArgumentException("No se pueden buscar las reservas de un profesor nulo.");
 		}
-		int posicion = 0;
-		Reserva[] busquedaProfesor = new Reserva[MAX_RESERVAS];
-		for (int i = 0; i < coleccionReservas.length - 1 && coleccionReservas[i] != null; i++) {
-			if (coleccionReservas[i].getProfesor().equals(profesor)) {
-				System.out.println(coleccionReservas[i]);
-				busquedaProfesor[posicion] = new Reserva(coleccionReservas[i]);
-				posicion++;
+		List<Reserva> busquedaProfesor = new ArrayList<>();
+		for (Reserva reserva : coleccionReservas) {
+			if (reserva.getProfesor().equals(profesor)) {
+				busquedaProfesor.add(new Reserva(reserva));
 			}
 		}
 		return busquedaProfesor;
 	}
 
-	public Reserva[] getReservasAula(Aula aula) {
+	public List<Reserva> getReservasAula(Aula aula) {
 		if (aula == null) {
 			throw new IllegalArgumentException("No se pueden buscar las reservas de una aula nula.");
 		}
-		int posicion = 0;
-		Reserva[] busquedaAula = new Reserva[MAX_RESERVAS];
-		for (int i = 0; i < coleccionReservas.length - 1 && coleccionReservas[i] != null; i++) {
-			if (coleccionReservas[i].getAula().equals(aula)) {
-				System.out.println(coleccionReservas[i]);
-				busquedaAula[posicion] = new Reserva(coleccionReservas[i]);
-				posicion++;
+		List<Reserva> busquedaAula = new ArrayList<>();
+		for (Reserva reserva : coleccionReservas) {
+			if (reserva.getAula().equals(aula)) {
+				busquedaAula.add(new Reserva(reserva));
 			}
 		}
 		return busquedaAula;
 	}
 
-	public Reserva[] getReservasPermanencia(Permanencia permanencia) {
+	public List<Reserva> getReservasPermanencia(Permanencia permanencia) {
 		if (permanencia == null) {
 			throw new IllegalArgumentException("No se pueden buscar las reservas por una permanencia nula.");
 		}
-		int posicion = 0;
-		Reserva[] busquedaPermanencia = new Reserva[MAX_RESERVAS];
-		for (int i = 0; i < coleccionReservas.length - 1 && coleccionReservas[i] != null; i++) {
-			if (coleccionReservas[i].getPermanencia().equals(permanencia)) {
-				System.out.println(coleccionReservas[i]);
-				busquedaPermanencia[posicion] = new Reserva(coleccionReservas[i]);
-				posicion++;
+		List<Reserva> busquedaPermanencia = new ArrayList<>();
+		for (Reserva reserva : coleccionReservas) {
+			if (reserva.getPermanencia().equals(permanencia)) {
+				busquedaPermanencia.add(new Reserva(reserva));
 			}
 		}
 		return busquedaPermanencia;
@@ -180,8 +131,8 @@ public class Reservas {
 			throw new IllegalArgumentException("No se puede consultar la disponibilidad de una permanencia nula.");
 		}
 
-		for (int i = 0; i < coleccionReservas.length - 1 && coleccionReservas[i] != null; i++) {
-			if (coleccionReservas[i].getAula().equals(aula) & coleccionReservas[i].getPermanencia().equals(permanencia)) {
+		for (Reserva reserva : coleccionReservas) {
+			if (reserva.getAula().equals(aula) & reserva.getPermanencia().equals(permanencia)) {
 				return false;
 			}
 		}
