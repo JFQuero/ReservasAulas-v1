@@ -1,5 +1,7 @@
 package org.iesalandalus.programacion.reservasaulas.modelo;
 
+import java.util.List;
+
 import javax.naming.OperationNotSupportedException;
 
 import org.iesalandalus.programacion.reservasaulas.modelo.dao.*;
@@ -19,7 +21,7 @@ public class ModeloReservasAulas {
 	}
 
 	/* Metodos para Aulas */
-	public Aula[] getAulas() {
+	public List<Aula> getAulas() {
 		return aulas.getAulas();
 	}
 
@@ -27,7 +29,7 @@ public class ModeloReservasAulas {
 		return aulas.getNumAulas();
 	}
 
-	public String[] representarAulas() {
+	public List<String> representarAulas() {
 		return aulas.representar();
 	}
 
@@ -44,7 +46,7 @@ public class ModeloReservasAulas {
 	}
 
 	/* Metodos para Profesores */
-	public Profesor[] getProfesores() {
+	public List<Profesor> getProfesores() {
 		return profesores.getProfesores();
 	}
 
@@ -52,7 +54,7 @@ public class ModeloReservasAulas {
 		return profesores.getNumProfesores();
 	}
 
-	public String[] representarProfesores() {
+	public List<String> representarProfesores() {
 		return profesores.representar();
 	}
 
@@ -69,7 +71,7 @@ public class ModeloReservasAulas {
 	}
 
 	/* Metodos para Reservas */
-	public Reserva[] getReservas() {
+	public List<Reserva> getReservas() {
 		return reservas.getReservas();
 	}
 
@@ -77,7 +79,7 @@ public class ModeloReservasAulas {
 		return reservas.getNumReservas();
 	}
 
-	public String[] representarReservas() {
+	public List<String> representarReservas() {
 		return reservas.representar();
 	}
 
@@ -93,15 +95,15 @@ public class ModeloReservasAulas {
 		reservas.borrar(reserva);
 	}
 
-	public Reserva[] getReservasAula(Aula aula) {
+	public List<Reserva> getReservasAula(Aula aula) {
 		return reservas.getReservasAula(aula);
 	}
 
-	public Reserva[] getReservasProfesor(Profesor profesor) {
+	public List<Reserva> getReservasProfesor(Profesor profesor) {
 		return reservas.getReservasProfesor(profesor);
 	}
 
-	public Reserva[] getReservasPermanencia(Permanencia permanencia) {
+	public List<Reserva> getReservasPermanencia(Permanencia permanencia) {
 		return reservas.getReservasPermanencia(permanencia);
 	}
 
